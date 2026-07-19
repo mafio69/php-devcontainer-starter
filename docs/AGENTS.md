@@ -1,5 +1,11 @@
 # AGENTS.md
 
+## Current branch: `vanilla`
+
+No framework. `public/index.php` + `App\Http\SimpleRouter` only - do not add a routing
+library or PSR-7 here, that defeats the point of this branch (see README). If a task
+needs those, it belongs on `slim` or `symfony` instead.
+
 ## Purpose
 
 This repository is a PHP starter template for Docker / Dev Container based development.

@@ -37,6 +37,13 @@ docker compose exec -T app vendor/bin/phpunit
 docker compose exec -T app vendor/bin/phpstan analyse
 ```
 
+## This branch: `vanilla`
+
+No framework, no routing library. `public/index.php` wires PHP superglobals into
+`App\Http\SimpleRouter` (`src/Http/SimpleRouter.php`), a hand-written, testable router -
+the point of this branch is to show what a minimal PHP app looks like without any
+abstraction on top. Open `http://localhost:8000/` after `docker compose up -d --build`.
+
 ## Smoke test
 
 The repository contains a GitHub Actions smoke workflow that builds containers and verifies the starter in CI.
