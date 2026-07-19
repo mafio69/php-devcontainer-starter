@@ -7,6 +7,8 @@ Starter template for PHP applications with Dev Container, Docker Compose, AI doc
 This repository is a practical PHP starter for local development in Docker / Dev Container.
 It is designed as a clean base for future project variants such as Slim, Symfony, and a lightweight vanilla branch.
 
+
+
 ## Included
 
 - Dev Container configuration

@@ -49,3 +49,8 @@ Keep AGENTS.md short, specific, and authoritative for AI assistants.
 ## DO NOT MAKE CHANGES WITHOUT EXPLICIT PERMISSION
 ## DO NOT READ, ACCESS, OR EXPOSE SECRETS. DO NOT ASK TO EDIT .ENV* FILES. DO NOT OPEN THEM. DO NOT PRINT THEM. ALWAYS REFER TO THE VARIABLE NAME OR TOKEN NAME, NEVER TO THE SECRET VALUE, TOKEN VALUE, OR PASSWORD. USE DUMMY SECRETS FOR TESTS.
 ## DO NOT MODIFY ANYTHING INSIDE vendor/
+## Current branch: `slim`
+
+Slim 4 app. Route wiring lives in `src/Application.php` (`Application::create()`),
+reused by both `public/index.php` and `tests/ApplicationTest.php`. Add new routes there,
+not directly in `public/index.php`.

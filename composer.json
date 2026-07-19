@@ -22,7 +22,9 @@
     "minimum-stability": "stable",
     "prefer-stable": true,
     "require": {
-        "php": "^8.4"
+        "php": "^8.4",
+        "slim/psr7": "^1.7",
+        "slim/slim": "^4.14"
     },
     "require-dev": {
         "phpro/grumphp": "^2.22",

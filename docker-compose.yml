@@ -6,6 +6,11 @@ services:
     volumes:
       - .:/workspace:cached
     working_dir: /workspace
-    command: sleep infinity
+    # Wbudowany serwer PHP, index.php jako router script (obsluguje tez sciezki bez
+    # fizycznego pliku, np. /health). Ten sam wzorzec powtarza sie w kazdej galezi
+    # (vanilla/slim/symfony) - rozni sie tylko zawartosc public/index.php.
+    command: php -S 0.0.0.0:8000 -t public public/index.php
+    ports:
+      - "8000:8000"
     extra_hosts:
       - "host.docker.internal:host-gateway"
