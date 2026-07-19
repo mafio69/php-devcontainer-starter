@@ -6,6 +6,8 @@ services:
     volumes:
       - .:/workspace:cached
     working_dir: /workspace
-    command: sleep infinity
+    command: php -S 0.0.0.0:8000 -t public public/index.php
+    ports:
+      - "8000:8000"
     extra_hosts:
       - "host.docker.internal:host-gateway"

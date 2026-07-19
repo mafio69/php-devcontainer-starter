@@ -22,7 +22,11 @@
     "minimum-stability": "stable",
     "prefer-stable": true,
     "require": {
-        "php": "^8.4"
+        "php": "^8.4",
+        "symfony/dotenv": "8.1.*",
+        "symfony/framework-bundle": "8.1.*",
+        "symfony/runtime": "8.1.*",
+        "symfony/yaml": "8.1.*"
     },
     "require-dev": {
         "phpro/grumphp": "^2.22",
@@ -38,8 +42,12 @@
     },
     "config": {
         "allow-plugins": {
-            "phpro/grumphp": true
+            "phpro/grumphp": true,
+            "symfony/runtime": true
         },
         "sort-packages": true
+    },
+    "extra": {
+        "runtime": {}
     }
 }
