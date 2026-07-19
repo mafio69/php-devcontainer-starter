@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests;
 
-use Mariusz\TemplateApp\Example;
+use App\Example;
 use PHPUnit\Framework\TestCase;
 
 final class ExampleTest extends TestCase
