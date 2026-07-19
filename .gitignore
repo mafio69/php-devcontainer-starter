@@ -9,3 +9,5 @@
 /.env.local
 /.env.*.local
 /var/
+/config/reference.php
+/config/reference.php
