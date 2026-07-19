@@ -1,0 +1,53 @@
+name: Smoke Test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Show Docker versions
+        run: |
+          docker --version
+          docker compose version
+
+      - name: Build containers
+        run: docker compose build
+
+      - name: Start containers
+        run: docker compose up -d
+
+      - name: Show container status
+        run: docker compose ps
+
+      - name: Composer install
+        run: docker compose exec -T app composer install --no-interaction --prefer-dist
+
+      - name: Composer diagnose
+        run: docker compose exec -T app composer diagnose
+
+      - name: Check PHP modules
+        run: docker compose exec -T app php -m | grep -E "xdebug|PDO|pdo_sqlite|intl|zip|Zend OPcache"
+
+      - name: Run PHPUnit
+        run: docker compose exec -T app vendor/bin/phpunit
+
+      - name: Run PHPStan
+        run: docker compose exec -T app vendor/bin/phpstan analyse
+
+      - name: Show container logs on failure
+        if: failure()
+        run: docker compose logs --no-color
+
+      - name: Stop containers
+        if: always()
+        run: docker compose down -v
