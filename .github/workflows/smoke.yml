@@ -38,6 +38,13 @@ jobs:
       - name: Check PHP modules
         run: docker compose exec -T app php -m | grep -E "xdebug|PDO|pdo_sqlite|intl|zip|Zend OPcache"
 
+      - name: Sprawdz czy strona faktycznie sie wyswietla (HTTP smoke check)
+        run: |
+          curl -sf --retry 5 --retry-delay 1 --retry-connrefused http://localhost:8000/ \
+            | grep -q "It works. Symfony starter" || { echo "::error::/ nie zawiera oczekiwanego tekstu (It works. Symfony starter)"; exit 1; }
+          curl -sf --retry 5 --retry-delay 1 --retry-connrefused http://localhost:8000/health \
+            | grep -q '"status":"ok"' || { echo "::error::/health nie zwrocil oczekiwanego JSON-a"; exit 1; }
+
       - name: Run PHPUnit
         run: docker compose exec -T app vendor/bin/phpunit
 
