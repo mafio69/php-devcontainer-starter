@@ -1,11 +1,16 @@
 {
-    "name": "mariusz/template-app",
+    "name": "mafio69/php-devcontainer-starter",
     "description": "Starter template for PHP applications with Dev Container, AI docs, and quality tooling.",
     "type": "project",
     "license": "MIT",
     "autoload": {
         "psr-4": {
-            "Mariusz\\TemplateApp\\": "src/"
+            "App\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
         }
     },
     "authors": [
@@ -24,6 +29,12 @@
         "phpstan/phpstan": "^2.2",
         "friendsofphp/php-cs-fixer": "^3.95",
         "phpunit/phpunit": "^13.2"
+    },
+    "scripts": {
+        "test": "phpunit",
+        "stan": "phpstan analyse",
+        "fix": "php-cs-fixer fix",
+        "check-cs": "php-cs-fixer fix --dry-run --diff"
     },
     "config": {
         "allow-plugins": {
