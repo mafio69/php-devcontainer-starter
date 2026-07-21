@@ -49,3 +49,21 @@ Keep AGENTS.md short, specific, and authoritative for AI assistants.
 ## DO NOT MAKE CHANGES WITHOUT EXPLICIT PERMISSION
 ## DO NOT READ, ACCESS, OR EXPOSE SECRETS. DO NOT ASK TO EDIT .ENV* FILES. DO NOT OPEN THEM. DO NOT PRINT THEM. ALWAYS REFER TO THE VARIABLE NAME OR TOKEN NAME, NEVER TO THE SECRET VALUE, TOKEN VALUE, OR PASSWORD. USE DUMMY SECRETS FOR TESTS.
 ## DO NOT MODIFY ANYTHING INSIDE vendor/
+
+## Technical enforcement (this file alone is not enough)
+
+This file is advice to the model, not a technical guarantee — it can be (and has been)
+ignored. The actual barrier is `opencode.json` in this repo: `permission.task = deny`
+(subagents disabled — a known bug lets them bypass `deny` on `read`/`grep`),
+`permission.external_directory = deny`, and `read`/`edit`/`glob`/`grep` deny anything
+dot-prefixed except `.local/`, `.github/`, `.opencode/`. `.local/` is the only place for
+AI scratch/task files that must never reach git.
+
+Note: `bash` (e.g. `cat .env`) is a separate permission channel not fully covered above —
+real production secrets should not live on any machine running a coding agent.
+## Current branch: `symfony`
+
+Minimal Symfony skeleton (framework-bundle + runtime only, no Doctrine/security/twig
+yet - add them when the real app needs them, not speculatively). Routes are
+attribute-based on controllers (`src/Controller/`), autowired via `config/services.yaml`.
+Copy `.env.example` to `.env` and set a real `APP_SECRET` before running outside tests.
