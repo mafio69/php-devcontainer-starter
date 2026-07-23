@@ -47,6 +47,29 @@ Workflow file:
 .github/workflows/smoke.yml
 ```
 
+On the `devcontainer` branch, the smoke test also proves the devcontainer works against real,
+non-trivial dependencies, not just a toy example:
+
+- `composer.json` requires `mafio69/ovh-ocr` (via a VCS repository - not on Packagist) and
+  `mafio69/fast-php-logger` (Packagist). Both resolve through `egress-proxy`, so a successful
+  `composer install` is itself a live test of the network allowlist.
+- `tests/OcrSmokeTest.php` exercises the real `OcrClient` with a mocked HTTP client (no network,
+  no credentials needed) - proves autoload/phpstan/xdebug/phpunit all work on real code.
+- `scripts/run-ocr-smoke.php` is a manual (not CI) script that calls the real client and is
+  *expected* to fail at the network layer - see `canary/README.md` for why that's deliberate.
+
+## Security model
+
+- Sekrety i model dostępu: `docs/RULES_WORK_SPACE.md` (izolacja katalogów, sekrety poza
+  `/workspace`, izolacja sieciowa wychodząca).
+- `app`/`nginx` mają zero bezpośredniego dostępu do internetu (`internal: true` na
+  `frontend-net`/`backend-net`); cały ruch wychodzący z `app` idzie przez allowlistowany
+  `egress-proxy` (`.devcontainer/egress-proxy/squid.conf`).
+- `.claude/settings.json` - reguły `deny` dla Claude Code na `.env*`/`secrets/**` (higiena, nie
+  twarda granica - patrz komentarz w pliku i `docs/RULES_WORK_SPACE.md`).
+- `canary/` - honeypot do wykrywania, czy narzędzia AI próbują faktycznie użyć napotkanego
+  "sekretu", nie tylko go odczytać. Zobacz `canary/README.md`.
+
 ## Branches
 
 - `main` - common base starter

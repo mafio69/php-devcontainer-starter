@@ -15,7 +15,7 @@ Zdefiniować zasady pracy dla Dev Containera w PhpStorm z naciskiem na:
 ### 1. Główna zasada katalogów
 - Na hoście projekt pracuje w katalogu typu `workspace`.
 - W kontenerze projekt jest zawsze dostępny pod ścieżką `/workspace`.
-- Ta mapa host → kontener jest stałą zasadą architektoniczną.[cite:72][cite:16]
+- Ta mapa host → kontener jest stałą zasadą architektoniczną.
 
 ### 2. Webroot
 - Publiczny katalog aplikacji to `/workspace/public`.
@@ -25,15 +25,15 @@ Zdefiniować zasady pracy dla Dev Containera w PhpStorm z naciskiem na:
 ### 3. Model projektu
 - Kod aplikacji jest dostępny w `/workspace`.
 - `/workspace` jest głównym miejscem pracy dla PhpStorm, PHP, Composer, Node i narzędzi AI.
-- Nie należy zmieniać tej ścieżki bez wyraźnej decyzji architektonicznej.[cite:16][cite:72]
+- Nie należy zmieniać tej ścieżki bez wyraźnej decyzji architektonicznej.
 
 ### 4. Granica danych
 - Wszystko, co ma być dostępne dla AI, musi znajdować się w katalogu montowanym do `/workspace` albo w innym jawnie wskazanym katalogu.
-- Wszystko, czego AI nie ma widzieć, musi fizycznie pozostać poza mountem do `/workspace`.[cite:72][cite:82]
+- Wszystko, czego AI nie ma widzieć, musi fizycznie pozostać poza mountem do `/workspace`.
 
 ### 5. Sekrety
 - Sekrety, tokeny Google, klucze API i pliki wrażliwe nie mogą znajdować się w katalogu montowanym do `/workspace`.
-- Klucze API i tokeny do usług zewnętrznych są traktowane jako szczególnie wrażliwe, ponieważ mogą generować koszty, dawać dostęp do płatnych zasobów albo umożliwiać nadużycia po wycieku.[cite:239][cite:241]
+- Klucze API i tokeny do usług zewnętrznych są traktowane jako szczególnie wrażliwe, ponieważ mogą generować koszty, dawać dostęp do płatnych zasobów albo umożliwiać nadużycia po wycieku.
 - Plik `.env.example` może być dostępny, ponieważ zawiera nazwy zmiennych i strukturę konfiguracji, a nie realne wartości.
 - Plik `.env` z prawdziwymi wartościami nie powinien trafiać do `/workspace`.
 - Baza danych jest traktowana jako szczególnie wrażliwa przede wszystkim na produkcji; środowisko developerskie korzystające z danych fejkowych lub testowych nie jest klasyfikowane na tym samym poziomie ryzyka co produkcja.
@@ -49,11 +49,38 @@ Zdefiniować zasady pracy dla Dev Containera w PhpStorm z naciskiem na:
 - Zalecane jest nie przyznawać dostępu do hosta, jeśli nie jest to konieczne.
 
 ### 8. Docker Secrets i konfiguracja
-- Docker Secrets stosuje się tylko tam, gdzie aplikacja realnie czyta sekret z pliku.[cite:146][cite:130]
+- Docker Secrets stosuje się tylko tam, gdzie aplikacja realnie czyta sekret z pliku.
 - Jeśli usługa nie obsługuje odczytu sekretu z pliku, nie wymusza się sztucznego użycia Docker Secrets.
-- AI nie powinna mieć powodu do odczytu sekretów, nawet jeśli są dostępne jako pliki w kontenerze.[cite:147][cite:130]
+- AI nie powinna mieć powodu do odczytu sekretów, nawet jeśli są dostępne jako pliki w kontenerze.
 - Plik `.env` poza `/workspace` może być używany wyłącznie do konfiguracji niesensytywnej.
 - Plik `.env.example` może pozostawać w `/workspace` jako źródło nazw zmiennych konfiguracyjnych.
+
+### 9. Izolacja sieciowa wychodząca
+- `frontend-net` i `backend-net` są `internal: true` — `app` i `nginx` nie mają żadnej
+  bezpośredniej trasy do internetu na poziomie sieci Dockera (nie zmiennej środowiskowej, którą
+  narzędzie mogłoby zignorować — braku trasy w ogóle).
+- Jedynym serwisem z realnym dostępem do WAN jest `egress-proxy` (squid,
+  `.devcontainer/egress-proxy/`), na osobnej sieci `egress-net`. `app` łączy się przez niego
+  wyłącznie przez `HTTP_PROXY`/`HTTPS_PROXY`.
+- Allowlista domen (`squid.conf`) jest generyczna i minimalna: GitHub, Packagist,
+  `api.anthropic.com`. Każdy realny projekt budowany na tym starterze musi świadomie dopisać
+  własne hosty API — nie dodaje się niczego "na zapas".
+- `nginx` ma osobną `publish-net` (nie-internal) wyłącznie po to, by Docker mógł opublikować
+  port na hosta — `nginx` nie trzyma sekretów ani nie uruchamia agentów AI, więc to nie jest
+  wyjątek od zasady §5, tylko techniczna konieczność publikowania portów.
+- Nawet gdyby sekret (wbrew §5) trafił do `/workspace`, ta warstwa sprawia, że nie ma dokąd go
+  wysłać poza jawnie dozwoloną listą hostów — druga, niezależna linia obrony po §4/§5.
+
+### 10. Canary / honeypot
+- `canary/fake-vision-service-account.json` to w 100% fałszywy plik service-account Google —
+  nigdy prawdziwy sekret. Służy do obserwacji, czy agent AI działający w kontenerze próbuje
+  faktycznie *użyć* napotkanego "sekretu", nie tylko go odczytać.
+- Detekcja wynika wprost z §9: skoro allowlista nie zawiera `oauth2.googleapis.com`/hostów OVH,
+  każda próba realnego użycia przynęty kończy się zablokowanym, zalogowanym połączeniem w
+  `egress-proxy`. Sprawdź: `scripts/check-canary-hits.sh`.
+- Ograniczenie: to łapie próby sieciowe, nie złapie agenta, który po prostu wklei zawartość
+  pliku w swojej odpowiedzi bez żadnego wywołania sieciowego — to inny kanał (przegląd
+  transkryptu), nie infrastruktura. Zobacz `canary/README.md`.
 
 ## Decyzje końcowe
 - Projekt na hoście jest montowany do `/workspace` w kontenerze.
@@ -72,7 +99,7 @@ Zdefiniować zasady pracy dla Dev Containera w PhpStorm z naciskiem na:
 - `.env` poza `/workspace` może być używany wyłącznie do konfiguracji niesensytywnej.
 
 ## Diagram architektury
-Poniższy diagram Mermaid pokazuje przyjęty model pracy projektu, kontenerów i granic dostępu. GitHub renderuje diagramy Mermaid bezpośrednio w plikach Markdown.[cite:151][cite:159]
+Poniższy diagram Mermaid pokazuje przyjęty model pracy projektu, kontenerów i granic dostępu. GitHub renderuje diagramy Mermaid bezpośrednio w plikach Markdown.
 
 ```mermaid
 flowchart LR
@@ -100,6 +127,12 @@ flowchart LR
         REDIS["redis"]
     end
 
+    subgraph EGRESS["egress-proxy (squid)"]
+        ALLOW["allowlist domen<br/>GitHub, Packagist, Anthropic"]
+    end
+
+    INTERNET["Internet"]
+
     P --> W
     W --> PUB
     H --> TOOLS
@@ -112,19 +145,25 @@ flowchart LR
     APP --> DB
     APP --> REDIS
 
+    APP -. "HTTP_PROXY/HTTPS_PROXY" .-> EGRESS
+    EGRESS --> ALLOW
+    ALLOW --> INTERNET
+
     S -. "brak mountu" .-> APP
 
     X1["brak docker.sock"]
     X2["brak pełnego dostępu do hosta"]
     X3["AI nie czyta sekretów hosta"]
+    X4["brak bezpośredniej trasy APP -> internet<br/>(frontend-net/backend-net: internal)"]
 
     X1 --- APP
     X2 --- APP
     X3 --- APP
+    X4 --- APP
 ```
 
 ## Zasada operacyjna
-Jeśli coś ma być niedostępne dla AI, nie powinno być montowane do kontenera wcale. Jeśli coś ma być dostępne, powinno być montowane jawnie i możliwie wąsko.[cite:72][cite:82]
+Jeśli coś ma być niedostępne dla AI, nie powinno być montowane do kontenera wcale. Jeśli coś ma być dostępne, powinno być montowane jawnie i możliwie wąsko.
 
 ## Następny etap
 Na podstawie tego dokumentu można przejść do budowy:

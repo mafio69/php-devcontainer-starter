@@ -27,11 +27,16 @@ RUN apk add --no-cache \
     unzip \
     bash \
     $PHPIZE_DEPS \
-    postgresql-dev
+    postgresql-dev \
+    libjpeg-turbo-dev \
+    libpng-dev \
+    freetype-dev
 
-RUN docker-php-ext-install \
+RUN docker-php-ext-configure gd --with-jpeg --with-freetype \
+ && docker-php-ext-install \
     pdo_pgsql \
-    pgsql
+    pgsql \
+    gd
 
 RUN apk add --no-cache --virtual .xdebug-deps \
     $PHPIZE_DEPS \

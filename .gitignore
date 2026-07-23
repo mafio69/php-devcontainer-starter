@@ -15,3 +15,11 @@
 # AI scratch/task files - never commit
 .local/
 /docs/draft_rules_devcontainer.md
+
+# Docker secrets (dev-only bait password, but still never commit the value)
+/secrets/
+
+# Claude Code local tool settings (machine-specific) - settings.json IS tracked
+# (project-wide permission/deny rules, see /.claude/settings.json)
+.claude/*
+!.claude/settings.json

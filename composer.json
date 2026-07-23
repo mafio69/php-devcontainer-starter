@@ -21,14 +21,23 @@
     ],
     "minimum-stability": "stable",
     "prefer-stable": true,
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/mafio69/ocr-ai"
+        }
+    ],
     "require": {
-        "php": "^8.4"
+        "php": "^8.4",
+        "mafio69/ovh-ocr": "dev-master",
+        "mafio69/fast-php-logger": "^1.0"
     },
     "require-dev": {
         "phpro/grumphp": "^2.22",
         "phpstan/phpstan": "^2.2",
         "friendsofphp/php-cs-fixer": "^3.95",
-        "phpunit/phpunit": "^13.2"
+        "phpunit/phpunit": "^13.2",
+        "vlucas/phpdotenv": "^5.5"
     },
     "scripts": {
         "test": "phpunit",

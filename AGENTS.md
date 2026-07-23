@@ -61,9 +61,17 @@ AI scratch/task files that must never reach git.
 
 Note: `bash` (e.g. `cat .env`) is a separate permission channel not fully covered above —
 real production secrets should not live on any machine running a coding agent.
-## Current branch: `symfony`
+## Current branch: `devcontainer`
 
-Minimal Symfony skeleton (framework-bundle + runtime only, no Doctrine/security/twig
-yet - add them when the real app needs them, not speculatively). Routes are
-attribute-based on controllers (`src/Controller/`), autowired via `config/services.yaml`.
-Copy `.env.example` to `.env` and set a real `APP_SECRET` before running outside tests.
+Iterating on the devcontainer infra itself before merging into `main` (and, from there, into
+`slim`/`symfony`/`vanilla`) - not application code. Two things live on this branch that don't
+belong on the others:
+
+- **Network egress isolation**: `frontend-net`/`backend-net` are `internal: true`; all outbound
+  HTTP(S) from `app` goes through `.devcontainer/egress-proxy` (squid), allowlisted by domain.
+  See `docs/RULES_WORK_SPACE.md` §9. Adding a host: edit `squid.conf`, don't loosen `internal`.
+- **Real smoke-test dependencies**: `composer.json` requires `mafio69/ovh-ocr` (via VCS,
+  not on Packagist) and `mafio69/fast-php-logger` (Packagist) purely to prove composer/
+  phpstan/xdebug/phpunit work against real, non-trivial packages through the egress-proxy - not
+  because this starter is an OCR app. See `tests/OcrSmokeTest.php` (mocked HTTP, no network) vs.
+  `scripts/run-ocr-smoke.php` (manual, real call, expected to fail - see `canary/README.md`).
